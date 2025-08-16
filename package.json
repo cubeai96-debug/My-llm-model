@@ -1,0 +1,25 @@
+{
+  "name": "markov-mini-language-model",
+  "version": "1.0.0",
+  "description": "Gelişmiş Markov tabanlı mini language model - hatalı yazıları anlayabilen ve binlerce soru-cevap ile eğitilebilen",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "node src/main.js",
+    "train": "node src/trainer.js",
+    "test": "node src/test.js",
+    "demo": "node src/demo.js",
+    "generate-data": "node src/training_data_generator.js"
+  },
+  "keywords": [
+    "markov",
+    "language-model",
+    "nlp",
+    "javascript",
+    "machine-learning"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "fs": "^0.0.1-security"
+  }
+}
