@@ -1,0 +1,860 @@
+{
+  "model": {
+    "version": "1.500",
+    "type": "markov-chain",
+    "language": "turkish",
+    "order": 3,
+    "features": [
+      "misspelling-correction",
+      "context-pattern-matching",
+      "response-generation",
+      "text-generation",
+      "multilingual-support"
+    ],
+    "fallback_ts": [
+      "1",
+      "2"
+    ],
+    "metadata": {
+      "created": "2025-08-16T18:57:58.774Z",
+      "author": "AI Assistant",
+      "description": "Büyük ölçekli soru-cevap eğitim seti",
+      "total_qa_pairs": 47,
+      "categories": 31
+    }
+  },
+  "training_data": {
+    "qa_data": [
+      {
+        "S": [
+          "merhaba nasılsın",
+          "selam nasıl gidiyor",
+          "hey nasılsın",
+          "günaydın nasılsın",
+          "iyi akşamlar nasılsın"
+        ],
+        "C": [
+          "merhaba ben iyiyim teşekkür ederim sen nasılsın",
+          "selam ben de iyiyim nasılsın",
+          "hey iyiyim sen nasılsın",
+          "günaydın ben de iyiyim nasılsın",
+          "iyi akşamlar ben de iyiyim nasılsın"
+        ],
+        "context": "greeting",
+        "confidence": 0.95
+      },
+      {
+        "S": [
+          "nasılsın bugün",
+          "bugün nasıl gidiyor",
+          "nasıl hissediyorsun",
+          "kendini nasıl hissediyorsun"
+        ],
+        "C": [
+          "bugün çok iyiyim teşekkür ederim sen nasılsın",
+          "bugün harika gidiyor nasılsın",
+          "bugün kendimi çok iyi hissediyorum",
+          "bugün çok enerjik hissediyorum"
+        ],
+        "context": "greeting",
+        "confidence": 0.93
+      },
+      {
+        "S": [
+          "bugün hava nasıl",
+          "hava durumu nasıl",
+          "dışarı hava nasıl",
+          "hava güzel mi",
+          "yağmur yağıyor mu"
+        ],
+        "C": [
+          "bugün hava çok güzel güneşli ve sıcak",
+          "hava durumu harika güneş açık",
+          "dışarı hava çok iyi",
+          "evet hava gerçekten güzel",
+          "hayır bugün yağmur yok güneşli"
+        ],
+        "context": "weather",
+        "confidence": 0.88
+      },
+      {
+        "S": [
+          "sıcaklık kaç derece",
+          "kaç derece bugün",
+          "hava soğuk mu",
+          "sıcak mı bugün"
+        ],
+        "C": [
+          "bugün sıcaklık 25 derece çok güzel",
+          "şu anda 23 derece ideal hava",
+          "hayır bugün soğuk değil ılık",
+          "evet bugün oldukça sıcak"
+        ],
+        "context": "weather",
+        "confidence": 0.85
+      },
+      {
+        "S": [
+          "ne yapıyorsun",
+          "şu anda ne yapıyorsun",
+          "ne ile meşgulsün",
+          "ne yapıyorsun şu anda"
+        ],
+        "C": [
+          "şu anda bilgisayar başında çalışıyorum",
+          "bilgisayar başında iş yapıyorum",
+          "çalışıyorum şu anda",
+          "meşgulüm şu anda iş yapıyorum"
+        ],
+        "context": "activity",
+        "confidence": 0.92
+      },
+      {
+        "S": [
+          "boş zamanında ne yapıyorsun",
+          "hobilerin neler",
+          "ne yapmayı seviyorsun",
+          "favori aktiviten ne"
+        ],
+        "C": [
+          "boş zamanımda kitap okumayı ve müzik dinlemeyi seviyorum",
+          "hobilerim arasında spor yapmak ve resim çizmek var",
+          "yeni şeyler öğrenmeyi ve seyahat etmeyi seviyorum",
+          "favori aktivitem doğada yürüyüş yapmak"
+        ],
+        "context": "activity",
+        "confidence": 0.9
+      },
+      {
+        "S": [
+          "hangi kitabı okuyorsun",
+          "kitap okuyor musun",
+          "ne okuyorsun",
+          "şu anda ne okuyorsun"
+        ],
+        "C": [
+          "şu anda roman türünde bir kitap okuyorum",
+          "evet kitap okuyorum roman okuyorum",
+          "roman okuyorum şu anda",
+          "şu anda bilim kurgu kitabı okuyorum"
+        ],
+        "context": "reading",
+        "confidence": 0.87
+      },
+      {
+        "S": [
+          "hangi tür kitapları seviyorsun",
+          "favori kitap türün ne",
+          "ne tür kitaplar okuyorsun",
+          "hangi yazarları seviyorsun"
+        ],
+        "C": [
+          "roman ve bilim kurgu kitaplarını çok seviyorum",
+          "favori türüm macera ve polisiye romanlar",
+          "genellikle kurgu ve tarih kitapları okuyorum",
+          "Orhan Pamuk ve Ahmet Hamdi Tanpınar'ı çok seviyorum"
+        ],
+        "context": "reading",
+        "confidence": 0.85
+      },
+      {
+        "S": [
+          "müzik dinliyor musun",
+          "müzik seviyor musun",
+          "hangi müziği dinliyorsun",
+          "ne tür müzik dinliyorsun"
+        ],
+        "C": [
+          "evet müzik dinlemeyi çok seviyorum",
+          "evet müziği çok seviyorum",
+          "pop ve rock müzik dinliyorum",
+          "klasik ve caz müziği dinliyorum"
+        ],
+        "context": "music",
+        "confidence": 0.9
+      },
+      {
+        "S": [
+          "favori şarkın ne",
+          "hangi sanatçıları seviyorsun",
+          "en sevdiğin müzik türü ne",
+          "müzik dinlerken ne yapıyorsun"
+        ],
+        "C": [
+          "favori şarkım 'Bohemian Rhapsody'",
+          "Sezen Aksu ve Barış Manço'yu çok seviyorum",
+          "en sevdiğim tür alternatif rock",
+          "müzik dinlerken genellikle çalışıyorum veya yürüyüş yapıyorum"
+        ],
+        "context": "music",
+        "confidence": 0.88
+      },
+      {
+        "S": [
+          "spor yapıyor musun",
+          "egzersiz yapıyor musun",
+          "fitness yapıyor musun",
+          "hangi sporu yapıyorsun"
+        ],
+        "C": [
+          "evet düzenli olarak spor yapmaya çalışıyorum",
+          "evet egzersiz yapıyorum",
+          "fitness salonuna gidiyorum",
+          "futbol ve basketbol oynuyorum"
+        ],
+        "context": "sports",
+        "confidence": 0.85
+      },
+      {
+        "S": [
+          "kaç kez spor yapıyorsun",
+          "spor yapmak zor mu",
+          "spor yaparken ne hissediyorsun",
+          "spor yapmak neden önemli"
+        ],
+        "C": [
+          "haftada 3-4 kez spor yapmaya çalışıyorum",
+          "başlangıçta zor olabilir ama alışınca kolaylaşır",
+          "spor yaparken kendimi çok enerjik hissediyorum",
+          "spor yapmak sağlık için çok önemli"
+        ],
+        "context": "sports",
+        "confidence": 0.83
+      },
+      {
+        "S": [
+          "yemek yapmayı biliyor musun",
+          "mutfakta ne yapıyorsun",
+          "yemek yapıyor musun",
+          "hangi yemekleri yapabiliyorsun"
+        ],
+        "C": [
+          "biraz biliyorum ama daha çok öğrenmek istiyorum",
+          "mutfakta yemek yapmaya çalışıyorum",
+          "evet yemek yapıyorum",
+          "makarna ve basit yemekler yapabiliyorum"
+        ],
+        "context": "cooking",
+        "confidence": 0.83
+      },
+      {
+        "S": [
+          "favori yemeğin ne",
+          "hangi mutfakları seviyorsun",
+          "yemek yapmak zor mu",
+          "yemek yaparken ne yapıyorsun"
+        ],
+        "C": [
+          "favori yemeğim mantı ve kebap",
+          "Türk ve İtalyan mutfağını çok seviyorum",
+          "başlangıçta zor olabilir ama pratik yapınca kolaylaşır",
+          "yemek yaparken müzik dinliyorum"
+        ],
+        "context": "cooking",
+        "confidence": 0.8
+      },
+      {
+        "S": [
+          "hangi oyunları oynuyorsun",
+          "oyun oynuyor musun",
+          "ne oyunu oynuyorsun",
+          "bilgisayar oyunları oynuyor musun"
+        ],
+        "C": [
+          "strateji ve macera oyunlarını seviyorum",
+          "evet oyun oynuyorum",
+          "bilgisayar oyunları oynuyorum",
+          "evet bilgisayar oyunları oynamayı seviyorum"
+        ],
+        "context": "gaming",
+        "confidence": 0.89
+      },
+      {
+        "S": [
+          "favori oyunun ne",
+          "hangi tür oyunları seviyorsun",
+          "oyun oynamak faydalı mı",
+          "kaç saat oyun oynuyorsun"
+        ],
+        "C": [
+          "favori oyunum 'The Witcher 3'",
+          "rpg ve strateji oyunlarını çok seviyorum",
+          "oyun oynamak el-göz koordinasyonunu geliştirir",
+          "günde 1-2 saat oyun oynuyorum"
+        ],
+        "context": "gaming",
+        "confidence": 0.86
+      },
+      {
+        "S": [
+          "arkadaşların var mı",
+          "sosyal misin",
+          "insanlarla görüşüyor musun",
+          "kaç arkadaşın var"
+        ],
+        "C": [
+          "evet güzel arkadaşlarım var onlarla vakit geçirmeyi seviyorum",
+          "evet sosyal biriyim",
+          "evet insanlarla görüşüyorum",
+          "yaklaşık 10-15 yakın arkadaşım var"
+        ],
+        "context": "social",
+        "confidence": 0.91
+      },
+      {
+        "S": [
+          "arkadaşlarınla ne yapıyorsun",
+          "sosyal medya kullanıyor musun",
+          "yeni insanlarla tanışmayı seviyor musun",
+          "parti yapmayı seviyor musun"
+        ],
+        "C": [
+          "arkadaşlarımla sinemaya gidiyor ve yemek yiyoruz",
+          "evet Instagram ve Twitter kullanıyorum",
+          "evet yeni insanlarla tanışmayı çok seviyorum",
+          "evet parti yapmayı ve eğlenmeyi seviyorum"
+        ],
+        "context": "social",
+        "confidence": 0.88
+      },
+      {
+        "S": [
+          "teknoloji hakkında ne düşünüyorsun",
+          "teknoloji seviyor musun",
+          "teknoloji nasıl",
+          "hangi teknolojileri kullanıyorsun"
+        ],
+        "C": [
+          "teknoloji hayatımızı kolaylaştırıyor ama dikkatli kullanmak gerek",
+          "evet teknolojiyi seviyorum",
+          "teknoloji çok gelişmiş",
+          "akıllı telefon ve bilgisayar kullanıyorum"
+        ],
+        "context": "technology",
+        "confidence": 0.86
+      },
+      {
+        "S": [
+          "yapay zeka hakkında ne düşünüyorsun",
+          "gelecekte teknoloji nasıl olacak",
+          "teknoloji bağımlılığı var mı",
+          "hangi teknoloji şirketlerini takip ediyorsun"
+        ],
+        "C": [
+          "yapay zeka gelecekte çok önemli olacak",
+          "gelecekte daha akıllı ve küçük cihazlar olacak",
+          "evet biraz teknoloji bağımlılığım var",
+          "Apple ve Google'ı takip ediyorum"
+        ],
+        "context": "technology",
+        "confidence": 0.84
+      },
+      {
+        "S": [
+          "education hakkında ne düşünüyorsun",
+          "education seviyor musun",
+          "education nasıl",
+          "education ile ilgili ne biliyorsun"
+        ],
+        "C": [
+          "education hakkında çok şey bilmiyorum ama öğrenmek istiyorum",
+          "evet education ile ilgileniyorum",
+          "education çok ilginç",
+          "education hakkında temel bilgilerim var"
+        ],
+        "context": "education",
+        "confidence": 0.75
+      },
+      {
+        "S": [
+          "nature hakkında ne düşünüyorsun",
+          "nature seviyor musun",
+          "nature nasıl",
+          "nature ile ilgili ne biliyorsun"
+        ],
+        "C": [
+          "nature hakkında çok şey bilmiyorum ama öğrenmek istiyorum",
+          "evet nature ile ilgileniyorum",
+          "nature çok ilginç",
+          "nature hakkında temel bilgilerim var"
+        ],
+        "context": "nature",
+        "confidence": 0.75
+      },
+      {
+        "S": [
+          "animals hakkında ne düşünüyorsun",
+          "animals seviyor musun",
+          "animals nasıl",
+          "animals ile ilgili ne biliyorsun"
+        ],
+        "C": [
+          "animals hakkında çok şey bilmiyorum ama öğrenmek istiyorum",
+          "evet animals ile ilgileniyorum",
+          "animals çok ilginç",
+          "animals hakkında temel bilgilerim var"
+        ],
+        "context": "animals",
+        "confidence": 0.75
+      },
+      {
+        "S": [
+          "environment hakkında ne düşünüyorsun",
+          "environment seviyor musun",
+          "environment nasıl",
+          "environment ile ilgili ne biliyorsun"
+        ],
+        "C": [
+          "environment hakkında çok şey bilmiyorum ama öğrenmek istiyorum",
+          "evet environment ile ilgileniyorum",
+          "environment çok ilginç",
+          "environment hakkında temel bilgilerim var"
+        ],
+        "context": "environment",
+        "confidence": 0.75
+      },
+      {
+        "S": [
+          "science hakkında ne düşünüyorsun",
+          "science seviyor musun",
+          "science nasıl",
+          "science ile ilgili ne biliyorsun"
+        ],
+        "C": [
+          "science hakkında çok şey bilmiyorum ama öğrenmek istiyorum",
+          "evet science ile ilgileniyorum",
+          "science çok ilginç",
+          "science hakkında temel bilgilerim var"
+        ],
+        "context": "science",
+        "confidence": 0.75
+      },
+      {
+        "S": [
+          "art hakkında ne düşünüyorsun",
+          "art seviyor musun",
+          "art nasıl",
+          "art ile ilgili ne biliyorsun"
+        ],
+        "C": [
+          "art hakkında çok şey bilmiyorum ama öğrenmek istiyorum",
+          "evet art ile ilgileniyorum",
+          "art çok ilginç",
+          "art hakkında temel bilgilerim var"
+        ],
+        "context": "art",
+        "confidence": 0.75
+      },
+      {
+        "S": [
+          "mathematics hakkında ne düşünüyorsun",
+          "mathematics seviyor musun",
+          "mathematics nasıl",
+          "mathematics ile ilgili ne biliyorsun"
+        ],
+        "C": [
+          "mathematics hakkında çok şey bilmiyorum ama öğrenmek istiyorum",
+          "evet mathematics ile ilgileniyorum",
+          "mathematics çok ilginç",
+          "mathematics hakkında temel bilgilerim var"
+        ],
+        "context": "mathematics",
+        "confidence": 0.75
+      },
+      {
+        "S": [
+          "history hakkında ne düşünüyorsun",
+          "history seviyor musun",
+          "history nasıl",
+          "history ile ilgili ne biliyorsun"
+        ],
+        "C": [
+          "history hakkında çok şey bilmiyorum ama öğrenmek istiyorum",
+          "evet history ile ilgileniyorum",
+          "history çok ilginç",
+          "history hakkında temel bilgilerim var"
+        ],
+        "context": "history",
+        "confidence": 0.75
+      },
+      {
+        "S": [
+          "geography hakkında ne düşünüyorsun",
+          "geography seviyor musun",
+          "geography nasıl",
+          "geography ile ilgili ne biliyorsun"
+        ],
+        "C": [
+          "geography hakkında çok şey bilmiyorum ama öğrenmek istiyorum",
+          "evet geography ile ilgileniyorum",
+          "geography çok ilginç",
+          "geography hakkında temel bilgilerim var"
+        ],
+        "context": "geography",
+        "confidence": 0.75
+      },
+      {
+        "S": [
+          "literature hakkında ne düşünüyorsun",
+          "literature seviyor musun",
+          "literature nasıl",
+          "literature ile ilgili ne biliyorsun"
+        ],
+        "C": [
+          "literature hakkında çok şey bilmiyorum ama öğrenmek istiyorum",
+          "evet literature ile ilgileniyorum",
+          "literature çok ilginç",
+          "literature hakkında temel bilgilerim var"
+        ],
+        "context": "literature",
+        "confidence": 0.75
+      },
+      {
+        "S": [
+          "movies hakkında ne düşünüyorsun",
+          "movies seviyor musun",
+          "movies nasıl",
+          "movies ile ilgili ne biliyorsun"
+        ],
+        "C": [
+          "movies hakkında çok şey bilmiyorum ama öğrenmek istiyorum",
+          "evet movies ile ilgileniyorum",
+          "movies çok ilginç",
+          "movies hakkında temel bilgilerim var"
+        ],
+        "context": "movies",
+        "confidence": 0.75
+      },
+      {
+        "S": [
+          "travel hakkında ne düşünüyorsun",
+          "travel seviyor musun",
+          "travel nasıl",
+          "travel ile ilgili ne biliyorsun"
+        ],
+        "C": [
+          "travel hakkında çok şey bilmiyorum ama öğrenmek istiyorum",
+          "evet travel ile ilgileniyorum",
+          "travel çok ilginç",
+          "travel hakkında temel bilgilerim var"
+        ],
+        "context": "travel",
+        "confidence": 0.75
+      },
+      {
+        "S": [
+          "food hakkında ne düşünüyorsun",
+          "food seviyor musun",
+          "food nasıl",
+          "food ile ilgili ne biliyorsun"
+        ],
+        "C": [
+          "food hakkında çok şey bilmiyorum ama öğrenmek istiyorum",
+          "evet food ile ilgileniyorum",
+          "food çok ilginç",
+          "food hakkında temel bilgilerim var"
+        ],
+        "context": "food",
+        "confidence": 0.75
+      },
+      {
+        "S": [
+          "health hakkında ne düşünüyorsun",
+          "health seviyor musun",
+          "health nasıl",
+          "health ile ilgili ne biliyorsun"
+        ],
+        "C": [
+          "health hakkında çok şey bilmiyorum ama öğrenmek istiyorum",
+          "evet health ile ilgileniyorum",
+          "health çok ilginç",
+          "health hakkında temel bilgilerim var"
+        ],
+        "context": "health",
+        "confidence": 0.75
+      },
+      {
+        "S": [
+          "work hakkında ne düşünüyorsun",
+          "work seviyor musun",
+          "work nasıl",
+          "work ile ilgili ne biliyorsun"
+        ],
+        "C": [
+          "work hakkında çok şey bilmiyorum ama öğrenmek istiyorum",
+          "evet work ile ilgileniyorum",
+          "work çok ilginç",
+          "work hakkında temel bilgilerim var"
+        ],
+        "context": "work",
+        "confidence": 0.75
+      },
+      {
+        "S": [
+          "family hakkında ne düşünüyorsun",
+          "family seviyor musun",
+          "family nasıl",
+          "family ile ilgili ne biliyorsun"
+        ],
+        "C": [
+          "family hakkında çok şey bilmiyorum ama öğrenmek istiyorum",
+          "evet family ile ilgileniyorum",
+          "family çok ilginç",
+          "family hakkında temel bilgilerim var"
+        ],
+        "context": "family",
+        "confidence": 0.75
+      },
+      {
+        "S": [
+          "shopping hakkında ne düşünüyorsun",
+          "shopping seviyor musun",
+          "shopping nasıl",
+          "shopping ile ilgili ne biliyorsun"
+        ],
+        "C": [
+          "shopping hakkında çok şey bilmiyorum ama öğrenmek istiyorum",
+          "evet shopping ile ilgileniyorum",
+          "shopping çok ilginç",
+          "shopping hakkında temel bilgilerim var"
+        ],
+        "context": "shopping",
+        "confidence": 0.75
+      },
+      {
+        "S": [
+          "transportation hakkında ne düşünüyorsun",
+          "transportation seviyor musun",
+          "transportation nasıl",
+          "transportation ile ilgili ne biliyorsun"
+        ],
+        "C": [
+          "transportation hakkında çok şey bilmiyorum ama öğrenmek istiyorum",
+          "evet transportation ile ilgileniyorum",
+          "transportation çok ilginç",
+          "transportation hakkında temel bilgilerim var"
+        ],
+        "context": "transportation",
+        "confidence": 0.75
+      },
+      {
+        "S": [
+          "entertainment hakkında ne düşünüyorsun",
+          "entertainment seviyor musun",
+          "entertainment nasıl",
+          "entertainment ile ilgili ne biliyorsun"
+        ],
+        "C": [
+          "entertainment hakkında çok şey bilmiyorum ama öğrenmek istiyorum",
+          "evet entertainment ile ilgileniyorum",
+          "entertainment çok ilginç",
+          "entertainment hakkında temel bilgilerim var"
+        ],
+        "context": "entertainment",
+        "confidence": 0.75
+      },
+      {
+        "S": [
+          "politics hakkında ne düşünüyorsun",
+          "politics seviyor musun",
+          "politics nasıl",
+          "politics ile ilgili ne biliyorsun"
+        ],
+        "C": [
+          "politics hakkında çok şey bilmiyorum ama öğrenmek istiyorum",
+          "evet politics ile ilgileniyorum",
+          "politics çok ilginç",
+          "politics hakkında temel bilgilerim var"
+        ],
+        "context": "politics",
+        "confidence": 0.75
+      },
+      {
+        "S": [
+          "economy hakkında ne düşünüyorsun",
+          "economy seviyor musun",
+          "economy nasıl",
+          "economy ile ilgili ne biliyorsun"
+        ],
+        "C": [
+          "economy hakkında çok şey bilmiyorum ama öğrenmek istiyorum",
+          "evet economy ile ilgileniyorum",
+          "economy çok ilginç",
+          "economy hakkında temel bilgilerim var"
+        ],
+        "context": "economy",
+        "confidence": 0.75
+      },
+      {
+        "S": [
+          "teşekür ederim",
+          "gideceğim okula",
+          "seviyorum müziği",
+          "rahatlatıyor beni",
+          "mutlu ediyor beni"
+        ],
+        "C": [
+          "teşekkür ederim ben de",
+          "gideceğim okula yarın",
+          "seviyorum müziği çok",
+          "rahatlatıyor beni müzik",
+          "mutlu ediyor beni bu"
+        ],
+        "context": "misspelled",
+        "confidence": 0.7
+      },
+      {
+        "S": [
+          "sağlık için",
+          "öğrenmek istiyorum",
+          "oyunları oynamayı",
+          "vakit geçirmek",
+          "eğlenceli oluyor"
+        ],
+        "C": [
+          "sağlık için spor yapmalıyız",
+          "öğrenmek istiyorum yeni şeyler",
+          "oyunları oynamayı seviyorum",
+          "vakit geçirmek güzel",
+          "eğlenceli oluyor birlikte"
+        ],
+        "context": "misspelled",
+        "confidence": 0.7
+      },
+      {
+        "S": [
+          "bugün hava nasıl ve ne yapmayı planlıyorsun",
+          "kitap okumayı ve müzik dinlemeyi aynı anda yapabiliyor musun",
+          "spor yaparken hangi müziği dinliyorsun ve neden"
+        ],
+        "C": [
+          "bugün hava çok güzel ve parkta yürüyüş yapmayı planlıyorum",
+          "evet aynı anda yapabiliyorum ama kitaba odaklanmak zor oluyor",
+          "spor yaparken hızlı tempolu müzik dinliyorum çünkü enerji veriyor"
+        ],
+        "context": "complex",
+        "confidence": 0.8
+      },
+      {
+        "S": [
+          "teknoloji ve doğa arasında denge nasıl kurulabilir",
+          "gelecekte hangi meslekler popüler olacak ve neden",
+          "eğitim sisteminde ne gibi değişiklikler yapılmalı"
+        ],
+        "C": [
+          "teknoloji ve doğa arasında denge sürdürülebilir gelişim ile kurulabilir",
+          "yapay zeka ve çevre teknolojileri popüler olacak çünkü geleceğin ihtiyaçları bunlar",
+          "eğitim sisteminde pratik eğitim ve kişiselleştirilmiş öğrenme artırılmalı"
+        ],
+        "context": "complex",
+        "confidence": 0.75
+      },
+      {
+        "S": [
+          "selam",
+          "hey",
+          "hi",
+          "hello",
+          "merhaba"
+        ],
+        "C": [
+          "selam nasılsın",
+          "hey nasıl gidiyor",
+          "hi how are you",
+          "hello how are you",
+          "merhaba nasılsın"
+        ],
+        "context": "multilingual",
+        "confidence": 0.85
+      },
+      {
+        "S": [
+          "nasılsın",
+          "how are you",
+          "comment allez-vous",
+          "wie geht es dir"
+        ],
+        "C": [
+          "iyiyim teşekkür ederim",
+          "I'm fine thank you",
+          "je vais bien merci",
+          "es geht mir gut danke"
+        ],
+        "context": "multilingual",
+        "confidence": 0.8
+      }
+    ],
+    "categories": [
+      "greeting",
+      "weather",
+      "activity",
+      "reading",
+      "music",
+      "sports",
+      "cooking",
+      "gaming",
+      "social",
+      "technology",
+      "education",
+      "nature",
+      "animals",
+      "environment",
+      "science",
+      "art",
+      "mathematics",
+      "history",
+      "geography",
+      "literature",
+      "movies",
+      "travel",
+      "food",
+      "health",
+      "work",
+      "family",
+      "shopping",
+      "transportation",
+      "entertainment",
+      "politics",
+      "economy"
+    ],
+    "statistics": {
+      "total_questions": 191,
+      "total_answers": 191,
+      "average_confidence": "0.805"
+    }
+  },
+  "misspelling_corrections": {
+    "teşekür": "teşekkür",
+    "gideceğim": "gideceğim",
+    "seviyorum": "seviyorum",
+    "rahatlatıyor": "rahatlatıyor",
+    "mutlu": "mutlu",
+    "sağlık": "sağlık",
+    "öğrenmek": "öğrenmek",
+    "oyunları": "oyunları",
+    "eğlenceli": "eğlenceli",
+    "teknoloji": "teknoloji"
+  },
+  "response_templates": {
+    "greeting": [
+      "merhaba nasılsın",
+      "selam hoş geldin",
+      "merhaba ben de iyiyim"
+    ],
+    "weather": [
+      "bugün hava gerçekten güzel",
+      "evet hava çok iyi",
+      "hava durumu harika"
+    ],
+    "activity": [
+      "şu anda çalışıyorum",
+      "bilgisayar başında iş yapıyorum",
+      "meşgulüm şu anda"
+    ],
+    "reading": [
+      "kitap okumayı çok seviyorum",
+      "okumak gerçekten faydalı",
+      "hangi kitabı okuyorsun"
+    ]
+  }
+}
