@@ -1,25 +1,25 @@
 {
-  "name": "markov-mini-language-model",
-  "version": "1.0.0",
-  "description": "Gelişmiş Markov tabanlı mini language model - hatalı yazıları anlayabilen ve binlerce soru-cevap ile eğitilebilen",
-  "main": "src/main.js",
+  "name": "qube",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Qube - Gemma ile sohbet uygulaması (SPA + API)",
   "scripts": {
-    "start": "node src/main.js",
-    "train": "node src/trainer.js",
-    "test": "node src/test.js",
-    "demo": "node src/demo.js",
-    "generate-data": "node src/training_data_generator.js"
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "cd server && node index.js",
+    "dev:client": "cd client && npm run dev",
+    "build:client": "cd client && npm run build",
+    "start": "cd server && node index.js"
   },
   "keywords": [
-    "markov",
-    "language-model",
-    "nlp",
-    "javascript",
-    "machine-learning"
+    "chat",
+    "gemma",
+    "spa",
+    "react",
+    "express"
   ],
   "author": "Your Name",
   "license": "MIT",
-  "dependencies": {
-    "fs": "^0.0.1-security"
+  "devDependencies": {
+    "concurrently": "^9.1.2"
   }
 }
