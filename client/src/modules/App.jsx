@@ -28,6 +28,7 @@ function NavBar() {
         <ul className="space-y-4 text-gray-300">
           <li><NavLink to="/" className={({isActive}) => `block hover:text-green-500 transition ${isActive ? 'text-green-500' : ''}`}>Sohbet</NavLink></li>
           <li><NavLink to="/mini-twitter" className={({isActive}) => `block hover:text-green-500 transition ${isActive ? 'text-green-500' : ''}`}>MiniTwitter</NavLink></li>
+          <li><NavLink to="/mini-twitter/t/:id" className={() => `hidden`}>Tweet</NavLink></li>
           <li><NavLink to="/history" className={({isActive}) => `block hover:text-green-500 transition ${isActive ? 'text-green-500' : ''}`}>Geçmiş</NavLink></li>
           <li><NavLink to="/settings" className={({isActive}) => `block hover:text-green-500 transition ${isActive ? 'text-green-500' : ''}`}>Ayarlar</NavLink></li>
           <li><NavLink to="/account" className={({isActive}) => `block hover:text-green-500 transition ${isActive ? 'text-green-500' : ''}`}>Hesap</NavLink></li>
@@ -47,6 +48,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<ChatPage />} />
             <Route path="/mini-twitter" element={<TwitterPage />} />
+            <Route path="/mini-twitter/t/:id" element={<TwitterPage />} />
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/account" element={<AccountPage />} />

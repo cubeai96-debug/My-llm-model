@@ -22,6 +22,7 @@ import {
   query,
   orderByChild,
 } from 'firebase/database'
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 
 export default function TwitterPage() {
   useEffect(() => {
@@ -40,6 +41,7 @@ export default function TwitterPage() {
     const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig)
     const auth = getAuth(app)
     const db = getDatabase(app)
+    const storage = getStorage(app)
     const provider = new GoogleAuthProvider()
 
     // DOM elements
@@ -66,6 +68,8 @@ export default function TwitterPage() {
     const composeTextarea = document.getElementById('compose-textarea')
     const composeCharCount = document.getElementById('compose-char-count')
     const composeTweetBtn = document.getElementById('compose-tweet-btn')
+    const composeMediaInput = document.getElementById('compose-media-input')
+    const composeMediaPreview = document.getElementById('compose-media-preview')
     const searchInput = document.getElementById('search-input')
     const searchResults = document.getElementById('search-results')
     const notificationsList = document.getElementById('notifications-list')
@@ -97,6 +101,11 @@ export default function TwitterPage() {
     let mentionStartPos = 0
     let mentionSelectedIndex = 0
     let pendingOpenTweetId = null
+    let theme = localStorage.getItem('mt-theme') || 'light'
+    let infinitePage = 1
+    let pageSize = 20
+    let allTweets = []
+    let uploadingFile = null
 
     // Utility: time ago (tr)
     function timeAgo(date) {
@@ -165,7 +174,13 @@ export default function TwitterPage() {
         sections.home.innerHTML = '<p class="text-center text-gray-500 py-6">Henüz tweet yok.</p>'
         return
       }
-      sections.home.innerHTML = tweets.map(t => createTweetElement(t)).join('')
+      const slice = tweets.slice(0, pageSize * infinitePage)
+      sections.home.innerHTML = slice.map(t => createTweetElement(t)).join('')
+      const sentinel = document.createElement('div')
+      sentinel.id = 'infinite-sentinel'
+      sentinel.className = 'py-6 text-center text-gray-400'
+      sentinel.textContent = slice.length < tweets.length ? 'Daha fazla yükleniyor...' : ''
+      sections.home.appendChild(sentinel)
     }
 
     function renderProfileTweets() {
@@ -435,11 +450,35 @@ export default function TwitterPage() {
       handleMentionSuggestions(e)
     })
 
-    composeTweetBtn?.addEventListener('click', () => {
+    // Media input change
+    composeMediaInput?.addEventListener('change', () => {
+      const file = composeMediaInput.files?.[0]
+      uploadingFile = file || null
+      if (!composeMediaPreview) return
+      composeMediaPreview.innerHTML = ''
+      if (file) {
+        const url = URL.createObjectURL(file)
+        const isVideo = file.type.startsWith('video/')
+        if (isVideo) {
+          composeMediaPreview.innerHTML = `<video src="${url}" class="max-h-64 rounded" controls></video>`
+        } else {
+          composeMediaPreview.innerHTML = `<img src="${url}" class="max-h-64 rounded" />`
+        }
+      }
+    })
+
+    composeTweetBtn?.addEventListener('click', async () => {
       const content = (composeTextarea?.value || '').trim()
       if (!content || !currentUser) return
       const tweetsRef = ref(db, 'tweets')
       const newTweetRef = push(tweetsRef)
+      let mediaUrl = null
+      if (uploadingFile) {
+        const path = `tweets/${currentUser.uid}/${Date.now()}_${uploadingFile.name}`
+        const sref = storageRef(storage, path)
+        await uploadBytes(sref, uploadingFile)
+        mediaUrl = await getDownloadURL(sref)
+      }
       set(newTweetRef, {
         id: newTweetRef.key,
         user: {
@@ -456,6 +495,7 @@ export default function TwitterPage() {
         likesBy: {},
         retweetsBy: {},
         repliesBy: {},
+        mediaUrl,
       })
       // Mention notifications
       const mentioned = Array.from(new Set((content.match(/@(\w+)/g) || []).map(m => m.slice(1))))
@@ -614,6 +654,23 @@ export default function TwitterPage() {
     })
 
     composeBtn?.addEventListener('click', () => { navigateTo('compose') })
+    // Theme toggle
+    document.getElementById('theme-toggle')?.addEventListener('click', () => {
+      theme = theme === 'dark' ? 'light' : 'dark'
+      localStorage.setItem('mt-theme', theme)
+      location.reload()
+    })
+    // Infinite scroll
+    sections.home?.addEventListener('scroll', () => {
+      const sentinel = document.getElementById('infinite-sentinel')
+      if (!sentinel || infinitePage * pageSize >= tweets.length) return
+      const rect = sentinel.getBoundingClientRect()
+      const containerRect = sections.home.getBoundingClientRect()
+      if (rect.top < containerRect.bottom + 100) {
+        infinitePage += 1
+        renderTimeline()
+      }
+    })
 
     loginForm?.addEventListener('submit', e => {
       e.preventDefault()
@@ -713,9 +770,13 @@ export default function TwitterPage() {
           break
         }
         case 'share': {
-          const url = `${window.location.origin}${window.location.pathname}?t=${id}`
-          navigator.clipboard?.writeText(url)
-          alert('Bağlantı kopyalandı: ' + url)
+          const url = `${window.location.origin}/mini-twitter/t/${id}`
+          if (navigator.share) {
+            navigator.share({ title: 'MiniTwitter', text: tweet.content.slice(0, 80), url }).catch(() => {})
+          } else {
+            navigator.clipboard?.writeText(url)
+            showToast('Bağlantı kopyalandı')
+          }
           break
         }
       }
@@ -969,11 +1030,14 @@ export default function TwitterPage() {
         #mention-suggestions li:hover, #mention-suggestions li.active { background-color: #3b82f6; color: white; }
       `}</style>
 
-      <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50 flex items-center justify-center h-14 shadow-sm">
+      <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50 flex items-center justify-between h-14 shadow-sm px-4">
         <h1 className="text-xl font-bold text-blue-600 select-none" id="page-title">MiniTwitter</h1>
+        <div className="flex items-center gap-2">
+          <button id="theme-toggle" className="px-3 py-1 rounded border text-sm">{theme === 'dark' ? 'Açık Tema' : 'Koyu Tema'}</button>
+        </div>
       </header>
 
-      <main className="flex-grow flex flex-col pt-14 pb-20 max-w-2xl mx-auto w-full relative" id="app">
+      <main className={`flex-grow flex flex-col pt-14 pb-20 max-w-2xl mx-auto w-full relative ${theme === 'dark' ? 'bg-neutral-900 text-gray-100' : ''}`} id="app">
         <section aria-live="polite" aria-relevant="additions" className="flex-grow overflow-y-auto bg-white divide-y divide-gray-200" id="timeline" tabIndex={0} />
 
         <section className="hidden flex flex-col h-full bg-white p-4" id="search-section" tabIndex={0}>
@@ -997,7 +1061,12 @@ export default function TwitterPage() {
               <ul className="hidden absolute top-full left-0 mt-1 max-w-full" id="mention-suggestions" />
               <div className="flex items-center justify-between mt-2">
                 <span className="text-sm text-gray-500" id="compose-char-count">280</span>
+                <div className="flex items-center gap-2">
+                  <input id="compose-media-input" type="file" accept="image/*,video/*" className="hidden" />
+                  <button type="button" onClick={() => document.getElementById('compose-media-input').click()} className="px-3 py-1 rounded border text-sm">Medya</button>
+                </div>
               </div>
+              <div id="compose-media-preview" className="mt-2" />
               <button aria-label="Tweet gönder" className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-full font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 transition self-end" disabled id="compose-tweet-btn" type="button">Tweetle</button>
             </div>
           </div>
