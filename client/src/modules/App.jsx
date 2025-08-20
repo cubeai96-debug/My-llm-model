@@ -5,6 +5,7 @@ import HistoryPage from './HistoryPage.jsx'
 import SettingsPage from './SettingsPage.jsx'
 import AccountPage from './AccountPage.jsx'
 import PrivacyPage from './PrivacyPage.jsx'
+import TwitterPage from './TwitterPage.jsx'
 
 function NavBar() {
   const [open, setOpen] = useState(false)
@@ -26,6 +27,7 @@ function NavBar() {
         </button>
         <ul className="space-y-4 text-gray-300">
           <li><NavLink to="/" className={({isActive}) => `block hover:text-green-500 transition ${isActive ? 'text-green-500' : ''}`}>Sohbet</NavLink></li>
+          <li><NavLink to="/mini-twitter" className={({isActive}) => `block hover:text-green-500 transition ${isActive ? 'text-green-500' : ''}`}>MiniTwitter</NavLink></li>
           <li><NavLink to="/history" className={({isActive}) => `block hover:text-green-500 transition ${isActive ? 'text-green-500' : ''}`}>Geçmiş</NavLink></li>
           <li><NavLink to="/settings" className={({isActive}) => `block hover:text-green-500 transition ${isActive ? 'text-green-500' : ''}`}>Ayarlar</NavLink></li>
           <li><NavLink to="/account" className={({isActive}) => `block hover:text-green-500 transition ${isActive ? 'text-green-500' : ''}`}>Hesap</NavLink></li>
@@ -41,9 +43,10 @@ export default function App() {
     <div className="min-h-screen bg-neutral-900 text-gray-200">
       <NavBar />
       <main className="pt-14 md:pl-64 flex flex-col items-center">
-        <div className="w-full max-w-md px-4">
+        <div className="w-full max-w-2xl px-4">
           <Routes>
             <Route path="/" element={<ChatPage />} />
+            <Route path="/mini-twitter" element={<TwitterPage />} />
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/account" element={<AccountPage />} />
