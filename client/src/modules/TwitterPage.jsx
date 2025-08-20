@@ -102,10 +102,13 @@ export default function TwitterPage() {
     let mentionSelectedIndex = 0
     let pendingOpenTweetId = null
     let theme = localStorage.getItem('mt-theme') || 'light'
+    let infiniteEnabled = JSON.parse(localStorage.getItem('mt-infinite') || 'true')
+    let optimisticEnabled = JSON.parse(localStorage.getItem('mt-optimistic') || 'true')
     let infinitePage = 1
     let pageSize = 20
-    let allTweets = []
     let uploadingFile = null
+    let tweetsLoaded = false
+    let blockedUids = new Set()
 
     // Utility: time ago (tr)
     function timeAgo(date) {
@@ -133,8 +136,15 @@ export default function TwitterPage() {
       const contentHtml = escapeHtml(tweet.content)
         .replace(/@(\w+)/g, '<a href="#" data-mention="$1" class="text-blue-600 font-semibold hover:underline">@$1<\/a>')
         .replace(/#(\w+)/g, '<a href="#" data-hashtag="$1" class="text-blue-600 font-semibold hover:underline">#$1<\/a>')
+      let mediaHtml = ''
+      if (tweet.mediaUrl) {
+        const isVideo = /\.(mp4|webm|ogg)$/i.test(tweet.mediaUrl)
+        mediaHtml = isVideo
+          ? `<video src="${tweet.mediaUrl}" class="mt-2 rounded max-h-96 w-full" controls></video>`
+          : `<img src="${tweet.mediaUrl}" alt="tweet medya" class="mt-2 rounded max-h-96 w-full object-cover" />`
+      }
       return `
-        <article tabindex="0" aria-label="Tweet by ${tweet.user.name} (@${tweet.user.username})" class="p-4 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none flex flex-col border-b border-gray-200">
+        <article data-open-id="${tweet.id}" tabindex="0" aria-label="Tweet by ${tweet.user.name} (@${tweet.user.username})" class="p-4 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none flex flex-col border-b border-gray-200">
           <div class="flex space-x-3">
             <img src="${tweet.user.avatar}" alt="${tweet.user.name} profil fotoğrafı" class="w-12 h-12 rounded-full object-cover flex-shrink-0" width="48" height="48" />
             <div class="flex-grow">
@@ -145,6 +155,7 @@ export default function TwitterPage() {
                 <time datetime="${tweet.date}" class="text-gray-500 text-sm">${timeAgo(new Date(tweet.date))}</time>
               </header>
               <p class="mt-1 text-gray-800 whitespace-pre-wrap">${contentHtml}</p>
+              ${mediaHtml}
               <nav class="mt-3 flex justify-between max-w-xs text-gray-500 text-sm" aria-label="Tweet actions">
                 <button data-id="${tweet.id}" data-action="reply" class="flex items-center space-x-1 hover:text-blue-600 focus:outline-none focus:text-blue-600" aria-label="Yanıtla">
                   <i class="far fa-comment"></i>
@@ -174,12 +185,12 @@ export default function TwitterPage() {
         sections.home.innerHTML = '<p class="text-center text-gray-500 py-6">Henüz tweet yok.</p>'
         return
       }
-      const slice = tweets.slice(0, pageSize * infinitePage)
+      const slice = tweets.filter(t => !blockedUids.has(t.user.uid)).slice(0, pageSize * infinitePage)
       sections.home.innerHTML = slice.map(t => createTweetElement(t)).join('')
       const sentinel = document.createElement('div')
       sentinel.id = 'infinite-sentinel'
       sentinel.className = 'py-6 text-center text-gray-400'
-      sentinel.textContent = slice.length < tweets.length ? 'Daha fazla yükleniyor...' : ''
+      sentinel.textContent = infiniteEnabled && slice.length < tweets.length ? 'Daha fazla yüklemek için aşağı kaydırın' : ''
       sections.home.appendChild(sentinel)
     }
 
@@ -391,6 +402,7 @@ export default function TwitterPage() {
             retweeted: t.retweetsBy ? !!t.retweetsBy[currentUser?.uid || ''] : false,
           }))
           .sort((a, b) => new Date(b.date) - new Date(a.date))
+        tweetsLoaded = true
         renderTimeline()
         renderProfileTweets()
         // Deep link open by id if provided
@@ -663,7 +675,7 @@ export default function TwitterPage() {
     // Infinite scroll
     sections.home?.addEventListener('scroll', () => {
       const sentinel = document.getElementById('infinite-sentinel')
-      if (!sentinel || infinitePage * pageSize >= tweets.length) return
+      if (!infiniteEnabled || !sentinel || infinitePage * pageSize >= tweets.length) return
       const rect = sentinel.getBoundingClientRect()
       const containerRect = sections.home.getBoundingClientRect()
       if (rect.top < containerRect.bottom + 100) {
@@ -734,7 +746,15 @@ export default function TwitterPage() {
 
     sections.home?.addEventListener('click', e => {
       const btn = e.target.closest('button[data-action]')
-      if (!btn) return
+      if (!btn) {
+        const open = e.target.closest('[data-open-id]')
+        if (open) {
+          const tid = open.getAttribute('data-open-id')
+          const tw = tweets.find(x => x.id === tid)
+          if (tw) openTweetModal(tw)
+        }
+        return
+      }
       const id = btn.getAttribute('data-id')
       const action = btn.getAttribute('data-action')
       const tweet = tweets.find(t => t.id === id)
