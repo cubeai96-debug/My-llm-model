@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">MiniTwitter</string>
+    <string name="title_activity_main">MiniTwitter</string>
+    <string name="package_name">com.qube.minitwitter</string>
+    <string name="custom_url_scheme">com.qube.minitwitter</string>
+</resources>
