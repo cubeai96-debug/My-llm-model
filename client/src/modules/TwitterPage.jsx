@@ -96,6 +96,7 @@ export default function TwitterPage() {
     let mentionQuery = ''
     let mentionStartPos = 0
     let mentionSelectedIndex = 0
+    let pendingOpenTweetId = null
 
     // Utility: time ago (tr)
     function timeAgo(date) {
@@ -121,15 +122,15 @@ export default function TwitterPage() {
     function createTweetElement(tweet) {
       const likedClass = tweet.liked ? 'text-red-500' : 'text-gray-500 hover:text-red-500'
       const contentHtml = escapeHtml(tweet.content)
-        .replace(/@(\w+)/g, '<span class="text-blue-600 font-semibold">@$1<\/span>')
-        .replace(/#(\w+)/g, '<span class="text-blue-600 font-semibold">#$1<\/span>')
+        .replace(/@(\w+)/g, '<a href="#" data-mention="$1" class="text-blue-600 font-semibold hover:underline">@$1<\/a>')
+        .replace(/#(\w+)/g, '<a href="#" data-hashtag="$1" class="text-blue-600 font-semibold hover:underline">#$1<\/a>')
       return `
         <article tabindex="0" aria-label="Tweet by ${tweet.user.name} (@${tweet.user.username})" class="p-4 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none flex flex-col border-b border-gray-200">
           <div class="flex space-x-3">
             <img src="${tweet.user.avatar}" alt="${tweet.user.name} profil fotoğrafı" class="w-12 h-12 rounded-full object-cover flex-shrink-0" width="48" height="48" />
             <div class="flex-grow">
               <header class="flex items-center space-x-2">
-                <h2 class="font-semibold text-gray-900">${tweet.user.name}</h2>
+                <button data-profile-uid="${tweet.user.uid}" class="font-semibold text-gray-900 hover:underline">${tweet.user.name}</button>
                 <span class="text-gray-500 text-sm">@${tweet.user.username}</span>
                 <span aria-hidden="true" class="text-gray-500 text-sm">·</span>
                 <time datetime="${tweet.date}" class="text-gray-500 text-sm">${timeAgo(new Date(tweet.date))}</time>
@@ -190,6 +191,7 @@ export default function TwitterPage() {
           case 'like': text = `${notif.userName} tweetinizi beğendi.`; break
           case 'retweet': text = `${notif.userName} tweetinizi retweetledi.`; break
           case 'reply': text = `${notif.userName} tweetinize yanıt verdi.`; break
+          case 'mention': text = `${notif.userName} sizden bahsetti.`; break
           case 'follow': text = `${notif.userName} sizi takip etmeye başladı.`; break
         }
         return `
@@ -376,6 +378,12 @@ export default function TwitterPage() {
           .sort((a, b) => new Date(b.date) - new Date(a.date))
         renderTimeline()
         renderProfileTweets()
+        // Deep link open by id if provided
+        if (pendingOpenTweetId && tweets.some(tt => tt.id === pendingOpenTweetId)) {
+          const tw = tweets.find(tt => tt.id === pendingOpenTweetId)
+          openTweetModal(tw)
+          pendingOpenTweetId = null
+        }
       })
       unsubscribers.push(unsubscribe)
     }
@@ -449,6 +457,14 @@ export default function TwitterPage() {
         retweetsBy: {},
         repliesBy: {},
       })
+      // Mention notifications
+      const mentioned = Array.from(new Set((content.match(/@(\w+)/g) || []).map(m => m.slice(1))))
+      if (mentioned.length && users?.length) {
+        mentioned.forEach(u => {
+          const target = users.find(x => x.username?.toLowerCase() === u.toLowerCase())
+          if (target) addNotification(target.uid, 'mention', currentUser, newTweetRef.key)
+        })
+      }
       clearComposeForm()
       navigateTo('home')
     })
@@ -504,6 +520,35 @@ export default function TwitterPage() {
       navigateTo('profile', { uid })
     })
 
+    // Mentions/hashtags/profile click inside timeline
+    sections.home?.addEventListener('click', e => {
+      const aMention = e.target.closest('a[data-mention]')
+      if (aMention) {
+        e.preventDefault()
+        const uname = aMention.getAttribute('data-mention')
+        const user = users.find(u => u.username?.toLowerCase() === uname?.toLowerCase())
+        if (user) navigateTo('profile', { uid: user.uid })
+        else { searchInput.value = `@${uname}`; navigateTo('search') }
+        return
+      }
+      const aTag = e.target.closest('a[data-hashtag]')
+      if (aTag) {
+        e.preventDefault()
+        const tag = aTag.getAttribute('data-hashtag')
+        searchInput.value = `#${tag}`
+        renderSearchResults(`#${tag}`)
+        navigateTo('search')
+        return
+      }
+      const profBtn = e.target.closest('button[data-profile-uid]')
+      if (profBtn) {
+        e.preventDefault()
+        const uid = profBtn.getAttribute('data-profile-uid')
+        if (uid) navigateTo('profile', { uid })
+        return
+      }
+    })
+
     function showUserProfile(uid) {
       if (!uid) return
       const usersRef = ref(db, `users/${uid}`)
@@ -523,6 +568,29 @@ export default function TwitterPage() {
         if (profileDescription) profileDescription.disabled = true
         if (saveProfileBtn) saveProfileBtn.style.display = 'none'
         if (logoutBtn) logoutBtn.style.display = 'none'
+        const followBtn = document.getElementById('follow-btn')
+        if (followBtn && currentUser) {
+          followBtn.classList.remove('hidden')
+          const followerRef = ref(db, `followers/${uid}/${currentUser.uid}`)
+          get(followerRef).then(s => {
+            const isFollowing = !!s.val()
+            followBtn.textContent = isFollowing ? 'Takibi Bırak' : 'Takip Et'
+            followBtn.onclick = () => {
+              if (isFollowing) {
+                set(followerRef, null)
+                const followingRef = ref(db, `following/${currentUser.uid}/${uid}`)
+                set(followingRef, null)
+                followBtn.textContent = 'Takip Et'
+              } else {
+                set(followerRef, true)
+                const followingRef = ref(db, `following/${currentUser.uid}/${uid}`)
+                set(followingRef, true)
+                addNotification(uid, 'follow', currentUser, null)
+                followBtn.textContent = 'Takibi Bırak'
+              }
+            }
+          })
+        }
         const userTweets = tweets.filter(t => t.user.uid === uid)
         if (!userTweets.length) {
           profileTweetsSection.innerHTML = '<p class="text-center text-gray-500 py-6">Henüz tweet yok.</p>'
@@ -640,10 +708,16 @@ export default function TwitterPage() {
           }
           break
         }
-        case 'reply':
-          alert('Yanıtla fonksiyonu henüz aktif değil.'); break
-        case 'share':
-          alert('Paylaş fonksiyonu henüz aktif değil.'); break
+        case 'reply': {
+          openTweetModal(tweet)
+          break
+        }
+        case 'share': {
+          const url = `${window.location.origin}${window.location.pathname}?t=${id}`
+          navigator.clipboard?.writeText(url)
+          alert('Bağlantı kopyalandı: ' + url)
+          break
+        }
       }
     })
 
@@ -673,6 +747,9 @@ export default function TwitterPage() {
             })
           }
         })
+        const params = new URLSearchParams(window.location.search)
+        const t = params.get('t')
+        if (t) pendingOpenTweetId = t
       } else {
         navigateTo('login')
         if (navProfileIcon) navProfileIcon.src = 'https://placehold.co/24x24/png?text=U&bg=3b82f6&fg=fff'
@@ -687,6 +764,81 @@ export default function TwitterPage() {
       })
       unsubscribers.push(unsubscribe)
     }
+
+    // Tweet modal logic
+    function openTweetModal(tweet) {
+      const modal = document.getElementById('tweet-modal')
+      const content = document.getElementById('tweet-modal-content')
+      if (!modal || !content) return
+      content.innerHTML = `
+        <div class="p-4 border-b border-gray-200">${createTweetElement(tweet)}</div>
+        <div class="p-4 space-y-2" id="tweet-replies"></div>
+        <div class="p-4 border-t border-gray-200">
+          <textarea id="reply-textarea" rows="3" class="w-full border rounded p-2" placeholder="Yanıtını yaz..."></textarea>
+          <button id="reply-send-btn" class="mt-2 bg-blue-600 text-white px-4 py-2 rounded">Yanıtla</button>
+        </div>
+      `
+      modal.classList.remove('hidden')
+      // Load replies
+      const repliesRef = ref(db, `replies/${tweet.id}`)
+      const repliesList = document.getElementById('tweet-replies')
+      onValue(repliesRef, snapshot => {
+        const data = snapshot.val() || {}
+        const list = Object.values(data).sort((a,b) => new Date(a.date) - new Date(b.date))
+        if (!list.length) {
+          repliesList.innerHTML = '<p class="text-gray-500">Henüz yanıt yok.</p>'
+        } else {
+          repliesList.innerHTML = list.map(r => `
+            <div class="flex space-x-3">
+              <img src="${r.user.avatar}" class="w-8 h-8 rounded-full object-cover" />
+              <div>
+                <div class="text-sm text-gray-700"><span class="font-semibold">${r.user.name}</span> @${r.user.username} · <span class="text-gray-500">${timeAgo(new Date(r.date))}</span></div>
+                <div class="text-gray-800">${escapeHtml(r.content)}</div>
+              </div>
+            </div>
+          `).join('')
+        }
+      })
+      // Send reply
+      const sendBtn = document.getElementById('reply-send-btn')
+      sendBtn.onclick = () => {
+        const ta = document.getElementById('reply-textarea')
+        const text = ta.value.trim()
+        if (!text || !currentUser) return
+        const newRef = push(repliesRef)
+        set(newRef, {
+          id: newRef.key,
+          content: text,
+          date: new Date().toISOString(),
+          user: {
+            uid: currentUser.uid,
+            name: currentUser.displayName || 'Kullanıcı',
+            username: currentUser.email.split('@')[0],
+            avatar: currentUser.photoURL || 'https://placehold.co/48x48/png?text=U&bg=3b82f6&fg=fff',
+          },
+        })
+        // increment replies
+        update(ref(db, `tweets/${tweet.id}`), { replies: (tweet.replies || 0) + 1 })
+        addNotification(tweet.user.uid, 'reply', currentUser, tweet.id)
+        // mention notifications in replies
+        const mentioned = Array.from(new Set((text.match(/@(\w+)/g) || []).map(m => m.slice(1))))
+        if (mentioned.length && users?.length) {
+          mentioned.forEach(u => {
+            const target = users.find(x => x.username?.toLowerCase() === u.toLowerCase())
+            if (target) addNotification(target.uid, 'mention', currentUser, tweet.id)
+          })
+        }
+        ta.value = ''
+      }
+    }
+
+    // Modal close
+    document.addEventListener('click', e => {
+      const closeBtn = e.target.closest('[data-close-modal]')
+      if (closeBtn) {
+        document.getElementById('tweet-modal')?.classList.add('hidden')
+      }
+    })
 
     function handleMentionSuggestions(e) {
       if (!composeTextarea) return
@@ -856,12 +1008,17 @@ export default function TwitterPage() {
             <img alt="Profil fotoğrafı, yuvarlak, mavi arka plan üzerinde beyaz U harfi" className="w-24 h-24 rounded-full object-cover" height="96" id="profile-avatar" src="https://placehold.co/96x96/png?text=U&bg=3b82f6&fg=fff" width="96" />
             <h2 className="text-2xl font-bold" id="profile-name">Kullanıcı Adı</h2>
             <p className="text-gray-600" id="profile-username">@kullanici</p>
-            <textarea className="w-full max-w-md border border-gray-300 rounded-lg p-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500" id="profile-description" maxLength={160} placeholder="Profil açıklamanızı yazın..." rows={3} />
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition" id="save-profile-btn" type="button">Profili Kaydet</button>
-            <button className="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition" id="logout-btn" type="button">Çıkış Yap</button>
+            <div className="flex gap-2 w-full max-w-md">
+              <textarea className="w-full border border-gray-300 rounded-lg p-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500" id="profile-description" maxLength={160} placeholder="Profil açıklamanızı yazın..." rows={3} />
+              <button className="hidden bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition" id="follow-btn" type="button">Takip Et</button>
+            </div>
+            <div className="flex gap-2">
+              <button className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition" id="save-profile-btn" type="button">Profili Kaydet</button>
+              <button className="bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition" id="logout-btn" type="button">Çıkış Yap</button>
+            </div>
           </div>
           <hr className="my-4" />
-          <h3 className="text-xl font-semibold mb-2">Tweetleriniz</h3>
+          <h3 className="text-xl font-semibold mb-2">Tweetler</h3>
           <section className="divide-y divide-gray-200" id="profile-tweets" />
         </section>
 
@@ -882,7 +1039,7 @@ export default function TwitterPage() {
           </p>
         </section>
 
-        <section className="hidden flex flex-col h-full bg-white p-6 justify-center items-center space-y-6 max-w-md mx-auto" id="register-section" tabIndex={0}>
+        <section className="hidden flex flex-col hFull bg-white p-6 justify-center items-center space-y-6 max-w-md mx-auto" id="register-section" tabIndex={0}>
           <h2 className="text-3xl font-bold text-blue-600">MiniTwitter Kayıt</h2>
           <form className="w-full space-y-4" id="register-form">
             <input className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" id="register-name" placeholder="Adınız Soyadınız" required type="text" />
@@ -928,7 +1085,17 @@ export default function TwitterPage() {
           <span className="mt-1 text-xs font-semibold opacity-0 group-hover:opacity-100 text-blue-600 transition-opacity">Profil</span>
         </a>
       </nav>
+
+      {/* Tweet Modal */}
+      <div id="tweet-modal" className="hidden fixed inset-0 z-[100] flex items-end md:items-center justify-center">
+        <div className="absolute inset-0 bg-black/40" data-close-modal></div>
+        <div className="relative bg-white w-full md:max-w-xl md:rounded-lg md:shadow-xl md:mx-4">
+          <button className="absolute top-2 right-2 text-gray-500 hover:text-black" aria-label="Kapat" data-close-modal>
+            <i className="fas fa-times" />
+          </button>
+          <div id="tweet-modal-content" className="max-h-[80vh] overflow-y-auto"></div>
+        </div>
+      </div>
     </div>
   )
 }
-
